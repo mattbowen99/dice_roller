@@ -1,72 +1,98 @@
+/************************************/
+/* Title: dice						*/
+/* Version: 1.2						*/
+/*	Added 1dn roller				*/
+/* Purpose: Roll gurps-style dice.	*/
+/* Functionality: Call and recieve	*/
+/*	3d6 rolls and a sum of their	*/
+/*	values.							*/
+/*	Call with an integer n argument	*/
+/*	between 2 and 999 and recieve	*/
+/*	1dn roll.						*/
+/* Functions: isNumber, inRange		*/
+/************************************/
+
 #include <iostream>		/* cin, cout */
-#include <stdlib.h>     /* srand, rand */
+#include <stdlib.h>     /* srand, rand, strtod*/
 #include <time.h>       /* time */
-#include <string.h>		/*strcpy*/
-
-
-class asciiArt{
-	protected:
-		char *art;
-
-	public:
-		int printArt();
-};
-
-int asciiArt::printArt()
-{
-	std::cout << art << "\n";
-	return 0;
-}
-
-class diceArt : public asciiArt{
-	public:
-		diceArt();
-};
-
-diceArt::diceArt()
-{
-	art = new char[202];
-	strcpy(art,R"(
-       .-------.    ______
-      /   o   /|   /\     \
-     /_______/o|  /o \  o  \
-     | o     | | /   o\_____\
-     |   o   |o/ \o   /o    /
-     |     o |/   \ o/  o  /
-jgs  '-------'     \/____o/)");
-
-	return;
-}
-
+#include <string.h>		/* strlen */
+#define DIEDIGITS 4
 
 int main(int argc, char **argv)
 {
-	int nums[3], i, total;
-	char dummy, in = '\0';
+	bool isNumber(char*);
+	bool inRange(double);
 
-	diceArt logo;
-
-	logo.printArt();
+	int nums[4], i, total;
+	char dummy;
+	char* dumpnt;
+	char die[DIEDIGITS];
 
 	srand(time(NULL));
-	do
+	total = 0;
+
+	try
 	{
-		total = 0;
+	if(argc == 1)
+	{
 		for(i=0; i<3;++i)
 			nums[i] = rand()%6+1;
-		if(argc == 1)
+		for(i=0;i<3;i++)
 		{
-
-			//print dice grahics before populating them with real numbers
-			for(i=0;i<3;i++)
-			{
-				total+=nums[i];
-			}
-			//std::cout << nums[i] << " ";
-			std::cout << "total = " << total << std::endl;
+			std::cout << nums[i] << " ";
+			total+=nums[i];
 		}
-		std::cin >> in;
-	}while(in == 'r');
+		std::cout << " = " << total << std::endl;
+	}
+	else if(argc == 2)
+	{
+		strncpy(die,argv[1],DIEDIGITS);
+		if((isNumber(die)) && (inRange(strtod(die,&dumpnt))))
+		{
+			std::cout << "1D" << die << ": ";
+            			std::cout << rand()%(int)(strtod(die,&dumpnt))+1;
+			std::cout << std::endl;
+		}
+		else
+			throw 20;
+	}
+	else
+		throw 10;
+	}
+	catch(int x)
+	{
+		switch(x)
+		{
+			case 10:
+				std::cout << "Only one argument is allowed"
+						  << std::endl;
+				break;
+			case 20:
+				std::cout << "Input must be an integer between "
+						  << "1 and 999" << std::endl;
+				break;
+			default:
+				std::cout << "Unknown Error" << std::endl;
+		}
+	}
+
 	return 0;
 }
 
+bool isNumber(char* in)
+{
+	int i;
+	for(i=0; in[i] != '\0'; i++)
+	{
+		if((in[i] < '0') || (in[i] > '9'))
+			return false;
+	}
+	return true;
+}
+
+bool inRange(double in)
+{
+	if((in >= 2) && (in <=100))
+		return true;
+	return false;
+}
